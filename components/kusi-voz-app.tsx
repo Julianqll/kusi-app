@@ -143,11 +143,38 @@ export default function KusiVozApp() {
     const command = commands[Math.floor(Math.random() * commands.length)]
 
     if (command.action === "call") {
-      setSubtitle(`¿Quieres llamar a ${command.contact}? Sí o No`)
+      const quechuaText = `¿${command.contact}ta qayayta munanki? Ari utaq Mana`
+      const spanishText = `¿Quieres llamar a ${command.contact}? Sí o No`
+      const fullText = `${quechuaText}\n${spanishText}`
+      
+      setSubtitle(fullText)
       setShowConfirmation(true)
       setPendingAction(`Llamando a ${command.contact}...`)
+      
+      // Reproducir el mensaje con síntesis de voz
+      if (isSupported) {
+        speak({ 
+          text: `${quechuaText}. ${spanishText}`, 
+          language: 'es-ES',
+          rate: 0.7,
+          pitch: 1.0,
+          volume: 1.0
+        })
+      }
     } else {
       setSubtitle(command.info)
+      
+      // Reproducir el mensaje con síntesis de voz
+      if (isSupported) {
+        speak({ 
+          text: command.info, 
+          language: 'es-ES',
+          rate: 0.7,
+          pitch: 1.0,
+          volume: 1.0
+        })
+      }
+      
       setTimeout(() => setSubtitle(""), 4000)
     }
   }
@@ -156,44 +183,153 @@ export default function KusiVozApp() {
     setShowConfirmation(false)
     if (confirmed) {
       setSubtitle(pendingAction)
+      
+      // Reproducir mensaje de confirmación
+      if (isSupported) {
+        speak({ 
+          text: pendingAction, 
+          language: 'es-ES',
+          rate: 0.7,
+          pitch: 1.0,
+          volume: 1.0
+        })
+      }
+      
       setTimeout(() => setSubtitle(""), 3000)
     } else {
-      setSubtitle("Cancelado")
+      const cancelledQuechua = "Hark'asqa"
+      const cancelledSpanish = "Cancelado"
+      const cancelledFull = `${cancelledQuechua}\n${cancelledSpanish}`
+      
+      setSubtitle(cancelledFull)
+      
+      // Reproducir mensaje de cancelación
+      if (isSupported) {
+        speak({ 
+          text: `${cancelledQuechua}. ${cancelledSpanish}`, 
+          language: 'es-ES',
+          rate: 0.7,
+          pitch: 1.0,
+          volume: 1.0
+        })
+      }
+      
       setTimeout(() => setSubtitle(""), 2000)
     }
   }
 
   const initiateCall = (contact: Contact) => {
     setSelectedContact(contact)
-    setSubtitle(`¿Quieres llamar a ${contact.name}? Sí o No`)
+    
+    // Mensaje en quechua y español
+    const quechuaText = `¿${contact.name}ta qayayta munanki? Ari utaq Mana`
+    const spanishText = `¿Quieres llamar a ${contact.name}? Sí o No`
+    const fullText = `${quechuaText}\n${spanishText}`
+    
+    setSubtitle(fullText)
     setShowConfirmation(true)
     setPendingAction("call")
+    
+    // Reproducir el mensaje con síntesis de voz
+    if (isSupported) {
+      speak({ 
+        text: `${quechuaText}. ${spanishText}`, 
+        language: 'es-ES',
+        rate: 0.7,
+        pitch: 1.0,
+        volume: 1.0
+      })
+    }
   }
 
   const handleCallConfirm = (confirmed: boolean) => {
     setShowConfirmation(false)
     if (confirmed && selectedContact) {
       setCallInProgress(true)
-      setSubtitle(`Llamando a ${selectedContact.name}...`)
+      const callingQuechua = `${selectedContact.name}ta qayayta qallarimuni`
+      const callingSpanish = `Llamando a ${selectedContact.name}...`
+      const callingFull = `${callingQuechua}\n${callingSpanish}`
+      
+      setSubtitle(callingFull)
+      
+      // Reproducir mensaje de llamada
+      if (isSupported) {
+        speak({ 
+          text: `${callingQuechua}. ${callingSpanish}`, 
+          language: 'es-ES',
+          rate: 0.7,
+          pitch: 1.0,
+          volume: 1.0
+        })
+      }
 
       // Simulate call duration
       setTimeout(() => {
         setCallInProgress(false)
-        setSubtitle("Llamada finalizada")
+        const endedQuechua = "Qayay tukusqa"
+        const endedSpanish = "Llamada finalizada"
+        const endedFull = `${endedQuechua}\n${endedSpanish}`
+        
+        setSubtitle(endedFull)
+        
+        // Reproducir mensaje de finalización
+        if (isSupported) {
+          speak({ 
+            text: `${endedQuechua}. ${endedSpanish}`, 
+            language: 'es-ES',
+            rate: 0.7,
+            pitch: 1.0,
+            volume: 1.0
+          })
+        }
+        
         setTimeout(() => {
           setSubtitle("")
           setCurrentFeature(null)
-        }, 2000)
+        }, 3000)
       }, 5000)
     } else {
-      setSubtitle("Llamada cancelada")
-      setTimeout(() => setSubtitle(""), 2000)
+      const cancelledQuechua = "Qayay hark'asqa"
+      const cancelledSpanish = "Llamada cancelada"
+      const cancelledFull = `${cancelledQuechua}\n${cancelledSpanish}`
+      
+      setSubtitle(cancelledFull)
+      
+      // Reproducir mensaje de cancelación
+      if (isSupported) {
+        speak({ 
+          text: `${cancelledQuechua}. ${cancelledSpanish}`, 
+          language: 'es-ES',
+          rate: 0.7,
+          pitch: 1.0,
+          volume: 1.0
+        })
+      }
+      
+      setTimeout(() => setSubtitle(""), 3000)
     }
   }
 
   const markMedicationTaken = (id: string) => {
     setHealthReminders((prev) => prev.map((reminder) => (reminder.id === id ? { ...reminder, taken: true } : reminder)))
-    setSubtitle("Medicina marcada como tomada")
+    
+    const takenQuechua = "Hampi chaskisqa"
+    const takenSpanish = "Medicina marcada como tomada"
+    const takenFull = `${takenQuechua}\n${takenSpanish}`
+    
+    setSubtitle(takenFull)
+    
+    // Reproducir mensaje de confirmación
+    if (isSupported) {
+      speak({ 
+        text: `${takenQuechua}. ${takenSpanish}`, 
+        language: 'es-ES',
+        rate: 0.7,
+        pitch: 1.0,
+        volume: 1.0
+      })
+    }
+    
     setTimeout(() => setSubtitle(""), 2000)
   }
 
@@ -204,14 +340,47 @@ export default function KusiVozApp() {
       status: "pending",
     }
     setHelpRequests((prev) => [...prev, newRequest])
-    setSubtitle("Buscando Nieto Digital disponible...")
+    
+    const searchingQuechua = "Nieto Digital maskana"
+    const searchingSpanish = "Buscando Nieto Digital disponible..."
+    const searchingFull = `${searchingQuechua}\n${searchingSpanish}`
+    
+    setSubtitle(searchingFull)
+    
+    // Reproducir mensaje de búsqueda
+    if (isSupported) {
+      speak({ 
+        text: `${searchingQuechua}. ${searchingSpanish}`, 
+        language: 'es-ES',
+        rate: 0.7,
+        pitch: 1.0,
+        volume: 1.0
+      })
+    }
 
     // Simulate connection
     setTimeout(() => {
       setHelpRequests((prev) =>
         prev.map((req) => (req.id === newRequest.id ? { ...req, status: "connected", volunteer: "Juan Pérez" } : req)),
       )
-      setSubtitle("Conectado con Juan Pérez")
+      
+      const connectedQuechua = "Juan Pérezwan tinkusqa"
+      const connectedSpanish = "Conectado con Juan Pérez"
+      const connectedFull = `${connectedQuechua}\n${connectedSpanish}`
+      
+      setSubtitle(connectedFull)
+      
+      // Reproducir mensaje de conexión
+      if (isSupported) {
+        speak({ 
+          text: `${connectedQuechua}. ${connectedSpanish}`, 
+          language: 'es-ES',
+          rate: 0.7,
+          pitch: 1.0,
+          volume: 1.0
+        })
+      }
+      
       setTimeout(() => setSubtitle(""), 3000)
     }, 3000)
   }
@@ -243,11 +412,28 @@ export default function KusiVozApp() {
                   <Button
                     onClick={() => {
                       setCallInProgress(false)
-                      setSubtitle("Llamada finalizada")
+                      
+                      const endedQuechua = "Qayay tukusqa"
+                      const endedSpanish = "Llamada finalizada"
+                      const endedFull = `${endedQuechua}\n${endedSpanish}`
+                      
+                      setSubtitle(endedFull)
+                      
+                      // Reproducir mensaje de finalización
+                      if (isSupported) {
+                        speak({ 
+                          text: `${endedQuechua}. ${endedSpanish}`, 
+                          language: 'es-ES',
+                          rate: 0.7,
+                          pitch: 1.0,
+                          volume: 1.0
+                        })
+                      }
+                      
                       setTimeout(() => {
                         setSubtitle("")
                         setCurrentFeature(null)
-                      }, 2000)
+                      }, 3000)
                     }}
                     className="h-20 px-12 text-2xl font-bold bg-red-500 hover:bg-red-600 text-white"
                   >
@@ -315,7 +501,10 @@ export default function KusiVozApp() {
                         onClick={() => markMedicationTaken(reminder.id)}
                         className="h-16 px-8 text-xl font-bold bg-[#4CAF50] hover:bg-[#45a049] text-white"
                       >
-                        Tomada
+                        <div className="text-center">
+                          <div className="text-[#FF8A50] text-sm">Chaskisqa</div>
+                          <div>Tomada</div>
+                        </div>
                       </Button>
                     ) : (
                       <div className="flex items-center gap-2 text-[#4CAF50] text-xl font-bold">
@@ -418,19 +607,28 @@ export default function KusiVozApp() {
                 onClick={() => requestHelp("Usar aplicación")}
                 className="h-24 text-2xl font-bold bg-[#FF8A50] hover:bg-[#ff7a40] text-white"
               >
-                Ayuda con aplicación
+                <div className="text-center">
+                  <div className="text-[#FF8A50] text-lg">App yanapay</div>
+                  <div>Ayuda con aplicación</div>
+                </div>
               </Button>
               <Button
                 onClick={() => requestHelp("Problema con teléfono")}
                 className="h-24 text-2xl font-bold bg-[#2196F3] hover:bg-[#1976D2] text-white"
               >
-                Problema con teléfono
+                <div className="text-center">
+                  <div className="text-[#FF8A50] text-lg">Telefono sasachakuy</div>
+                  <div>Problema con teléfono</div>
+                </div>
               </Button>
               <Button
                 onClick={() => requestHelp("Consulta general")}
                 className="h-24 text-2xl font-bold bg-[#4CAF50] hover:bg-[#45a049] text-white"
               >
-                Consulta general
+                <div className="text-center">
+                  <div className="text-[#FF8A50] text-lg">Huk yanapay</div>
+                  <div>Consulta general</div>
+                </div>
               </Button>
             </div>
 
@@ -516,7 +714,24 @@ export default function KusiVozApp() {
             {/* Subtitle display */}
             {subtitle && (
               <Card className="w-full max-w-2xl p-8 bg-white/95 backdrop-blur shadow-lg border-2 border-[#FF8A50]/20">
-                <p className="text-3xl font-bold text-center text-[#5D4037] leading-relaxed">{subtitle}</p>
+                <div className="text-center space-y-2">
+                  {subtitle.includes('\n') ? (
+                    // Texto bilingüe (quechua/español)
+                    subtitle.split('\n').map((line, index) => (
+                      <p 
+                        key={index} 
+                        className={`text-3xl font-bold text-[#5D4037] leading-relaxed ${
+                          index === 0 ? 'text-[#FF8A50]' : 'text-[#5D4037]/80'
+                        }`}
+                      >
+                        {line}
+                      </p>
+                    ))
+                  ) : (
+                    // Texto simple
+                    <p className="text-3xl font-bold text-center text-[#5D4037] leading-relaxed">{subtitle}</p>
+                  )}
+                </div>
               </Card>
             )}
 
@@ -528,7 +743,10 @@ export default function KusiVozApp() {
                   className="h-20 px-12 text-2xl font-bold bg-[#4CAF50] hover:bg-[#45a049] text-white"
                   size="lg"
                 >
-                  Sí
+                  <div className="text-center">
+                    <div className="text-[#FF8A50] text-lg">Ari</div>
+                    <div>Sí</div>
+                  </div>
                 </Button>
                 <Button
                   onClick={() => (pendingAction === "call" ? handleCallConfirm(false) : handleConfirm(false))}
@@ -536,7 +754,10 @@ export default function KusiVozApp() {
                   size="lg"
                   variant="outline"
                 >
-                  No
+                  <div className="text-center">
+                    <div className="text-[#FF8A50] text-lg">Mana</div>
+                    <div>No</div>
+                  </div>
                 </Button>
               </div>
             )}
@@ -590,7 +811,27 @@ export default function KusiVozApp() {
                 return (
                   <Button
                     key={feature.id}
-                    onClick={() => setCurrentFeature(feature.id)}
+                    onClick={() => {
+                      setCurrentFeature(feature.id)
+                      
+                      // Reproducir nombre de la sección
+                      if (isSupported) {
+                        const sectionNames = {
+                          communication: "Llamar",
+                          health: "Salud",
+                          pension: "Pensión",
+                          help: "Ayuda"
+                        }
+                        
+                        speak({ 
+                          text: sectionNames[feature.id], 
+                          language: 'es-ES',
+                          rate: 0.7,
+                          pitch: 1.0,
+                          volume: 1.0
+                        })
+                      }
+                    }}
                     className={cn(
                       "h-32 flex flex-col items-center justify-center gap-3 text-white font-bold text-xl",
                       "hover:scale-105 transition-transform shadow-lg",
