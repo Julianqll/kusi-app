@@ -21,28 +21,8 @@ export const useSpeechSynthesis = () => {
     setIsSupported('speechSynthesis' in window)
   }, [])
 
-  const speak = useCallback(({ 
-    text, 
-    language = 'es-ES', 
-    rate = 0.8, 
-    pitch = 1, 
-    volume = 1 
-  }: SpeechSynthesisOptions) => {
-    if (!isSupported) {
-      console.warn('Speech synthesis is not supported in this browser')
-      setPermissionError('La síntesis de voz no está soportada en este navegador')
-      return
-    }
-
-    // Cancel any ongoing speech
-    window.speechSynthesis.cancel()
-
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.lang = language
-    utterance.rate = rate
-    utterance.pitch = pitch
-    utterance.volume = volume
-
+  // Función para configurar los callbacks del utterance
+  const setupUtteranceCallbacks = useCallback((utterance: SpeechSynthesisUtterance) => {
     utterance.onstart = () => {
       setIsSpeaking(true)
       setIsPaused(false)
@@ -65,6 +45,11 @@ export const useSpeechSynthesis = () => {
         case 'not-allowed':
           setPermissionError('Se requiere permiso del usuario para reproducir audio')
           break
+        case 'interrupted':
+          // Error cuando se interrumpe la síntesis (normal cuando se inicia una nueva)
+          console.log('Speech synthesis interrupted - this is normal when starting a new speech')
+          setPermissionError(null) // No mostrar error para interrupciones normales
+          break
         case 'audio-busy':
           setPermissionError('El audio está ocupado, intente nuevamente')
           break
@@ -81,6 +66,44 @@ export const useSpeechSynthesis = () => {
           setPermissionError('Error de síntesis de voz')
       }
     }
+  }, [])
+
+  const speak = useCallback(({ 
+    text, 
+    language = 'es-ES', 
+    rate = 0.8, 
+    pitch = 1, 
+    volume = 1 
+  }: SpeechSynthesisOptions) => {
+    if (!isSupported) {
+      console.warn('Speech synthesis is not supported in this browser')
+      setPermissionError('La síntesis de voz no está soportada en este navegador')
+      return
+    }
+
+    // Cancel any ongoing speech cleanly
+    if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+      window.speechSynthesis.cancel()
+      // Pequeña pausa para asegurar que se cancele completamente
+      setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(text)
+        utterance.lang = language
+        utterance.rate = rate
+        utterance.pitch = pitch
+        utterance.volume = volume
+        setupUtteranceCallbacks(utterance)
+        window.speechSynthesis.speak(utterance)
+      }, 100)
+      return
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = language
+    utterance.rate = rate
+    utterance.pitch = pitch
+    utterance.volume = volume
+
+    setupUtteranceCallbacks(utterance)
 
     try {
       window.speechSynthesis.speak(utterance)
@@ -88,7 +111,7 @@ export const useSpeechSynthesis = () => {
       console.error('Error starting speech synthesis:', error)
       setPermissionError('No se pudo iniciar la síntesis de voz')
     }
-  }, [isSupported])
+  }, [isSupported, setupUtteranceCallbacks])
 
   const pause = useCallback(() => {
     if (isSupported && isSpeaking) {
